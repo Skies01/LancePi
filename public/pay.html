@@ -2,28 +2,43 @@
 <html>
 <head>
   <title>LancePi - Pay with Pi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 <body>
   <h2>Pay Freelancer with Pi</h2>
   <button onclick="pay()">Pay 1 Test-Pi</button>
+  <div id="log"></div>
   
   <script>
     Pi.init({ version: "2.0", sandbox: true });
     
+    function log(msg) {
+      document.getElementById('log').innerHTML += msg + '<br>';
+    }
+    
     function pay() {
-      Pi.createPayment({
-        amount: 1,
-        memo: "Payment for LancePi freelance work",
-        metadata: { type: "freelance" }
-      }, {
-        onReadyForServerApproval: (paymentId) => console.log("Approve:", paymentId),
-        onReadyForServerCompletion: (paymentId, txid) => {
-          alert("Payment complete! TX: " + txid);
-        },
-        onCancel: (paymentId) => alert("Cancelled"),
-        onError: (error, payment) => alert("Error: " + error)
-      });
+      log('Button tapped...');
+      try {
+        Pi.createPayment({
+          amount: 1,
+          memo: "LancePi Testnet Payment",
+          metadata: { type: "testnet" }
+        }, {
+          onReadyForServerApproval: (paymentId) => {
+            log('Payment created: ' + paymentId);
+            log('TAP APPROVE IN WALLET');
+          },
+          onReadyForServerCompletion: (paymentId, txid) => {
+            log('Payment complete! TX: ' + txid);
+            alert("Step 10 Done! TX: " + txid);
+          },
+          onCancel: (paymentId) => log("User cancelled"),
+          onError: (error, payment) => log("Error: " + error)
+        });
+      } catch(e) {
+        log('Error: ' + e.message);
+      }
     }
   </script>
 </body>
