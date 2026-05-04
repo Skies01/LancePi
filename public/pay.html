@@ -16,11 +16,14 @@
     function log(msg) {
       document.getElementById('log').innerHTML += msg + '<br>';
     }
+    onReadyForServerApproval: (paymentId) => {
+  log('Approving payment...');
+  fetch(`/api/approve?paymentId=${paymentId}`).then(() => {
+    log('Approved! Check wallet');
+  });
+},
 
-    // REPLACE THIS WITH YOUR PI API KEY FROM STEP 6
-    const = ‘’;
-
-    async function pay() {
+      async function pay() {
       log('Button tapped...');
       
       try {
