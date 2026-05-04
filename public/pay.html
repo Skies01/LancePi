@@ -16,17 +16,26 @@
     function log(msg) {
       document.getElementById('log').innerHTML += msg + '<br>';
     }
-    
-    function pay() {
+
+    async function pay() {
       log('Button tapped...');
+      
       try {
+        // Step 1: Authenticate user and request payments scope
+        log('Requesting permissions...');
+        const scopes = ['payments'];
+        const authResult = await Pi.authenticate(scopes, onIncompletePaymentFound);
+        log('Authenticated as: ' + authResult.user.username);
+        
+        // Step 2: Create payment
+        log('Creating payment...');
         Pi.createPayment({
           amount: 1,
           memo: "LancePi Testnet Payment",
           metadata: { type: "testnet" }
         }, {
           onReadyForServerApproval: (paymentId) => {
-            log('Payment created: ' + paymentId);
+            log('Payment ready: ' + paymentId);
             log('TAP APPROVE IN WALLET');
           },
           onReadyForServerCompletion: (paymentId, txid) => {
@@ -36,9 +45,14 @@
           onCancel: (paymentId) => log("User cancelled"),
           onError: (error, payment) => log("Error: " + error)
         });
-      } catch(e) {
-        log('Error: ' + e.message);
+        
+      } catch(err) {
+        log('Auth Error: ' + err);
       }
+    }
+
+    function onIncompletePaymentFound(payment) {
+      log('Found incomplete payment: ' + payment.identifier);
     }
   </script>
 </body>
