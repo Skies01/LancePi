@@ -17,43 +17,46 @@
       document.getElementById('log').innerHTML += msg + '<br>';
     }
 
+    // REPLACE THIS WITH YOUR PI API KEY FROM STEP 6
+    const PI_API_KEY = '209227aee852ec472b7b66b55422e65b4973480921df7ce7be6a375b6b54a939fcde9dd31c27d9231ea03f0a2746207092e1bee8c9e03f63dc0ffd4753c4a160';
+
     async function pay() {
       log('Button tapped...');
       
       try {
-        // Step 1: Authenticate user and request payments scope
-        log('Requesting permissions...');
         const scopes = ['payments'];
-        const authResult = await Pi.authenticate(scopes, onIncompletePaymentFound);
-        log('Authenticated as: ' + authResult.user.username);
+        await Pi.authenticate(scopes, onIncompletePaymentFound);
+        log('Authenticated');
         
-        // Step 2: Create payment
-        log('Creating payment...');
         Pi.createPayment({
           amount: 1,
-          memo: "LancePi Testnet Payment",
-          metadata: { type: "testnet" }
+          memo: "LancePi Testnet",
+          metadata: {}
         }, {
           onReadyForServerApproval: (paymentId) => {
-            log('Payment ready: ' + paymentId);
-            log('TAP APPROVE IN WALLET');
+            log('Approving payment...');
+            // Auto-approve for Testnet
+            fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Key ${PI_API_KEY}`
+              }
+            }).then(() => log('Approved! Check wallet'));
           },
           onReadyForServerCompletion: (paymentId, txid) => {
             log('Payment complete! TX: ' + txid);
-            alert("Step 10 Done! TX: " + txid);
+            alert("Step 10 Done!");
           },
-          onCancel: (paymentId) => log("User cancelled"),
-          onError: (error, payment) => log("Error: " + error)
+          onCancel: () => log("Cancelled"),
+          onError: (error) => log("Error: " + error)
         });
         
       } catch(err) {
-        log('Auth Error: ' + err);
+        log('Error: ' + err);
       }
     }
 
-    function onIncompletePaymentFound(payment) {
-      log('Found incomplete payment: ' + payment.identifier);
-    }
+    function onIncompletePaymentFound(payment) {}
   </script>
 </body>
 </html>
